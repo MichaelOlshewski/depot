@@ -1,6 +1,9 @@
 class Product < ApplicationRecord
   # apply attachments here
   has_one_attached :image
+  has_many :line_items
+
+  before_destroy :ensure_not_referenced_by_any_line_item
 
   # validate data here
   validates :title, :description, :image, presence: true
@@ -21,4 +24,12 @@ class Product < ApplicationRecord
       errors.add(:image, "must be a GIF, JPG, or PNG image")
     end
   end
+
+  private
+    def ensure_not_referenced_by_any_line_item
+      unless line_items.empty?
+        errors.add(:base, "Line Items present")
+        throw :abort
+      end
+    end
 end
